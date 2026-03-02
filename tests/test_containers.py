@@ -33,7 +33,7 @@ class TestDockerfileAgent:
 
     def test_dockerfile_installs_github_cli(self):
         content = (CONTAINERS_DIR / "Dockerfile.agent").read_text()
-        assert "gh" in content
+        assert "githubcli" in content or "github-cli" in content
 
 
 class TestEntrypoint:
