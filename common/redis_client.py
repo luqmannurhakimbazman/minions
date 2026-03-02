@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-import json
-from typing import Optional
-
 from redis.asyncio import Redis
 
 from common.models import Task, TaskStatus
@@ -28,7 +25,7 @@ class TaskStore:
         await self._r.set(key, task.model_dump_json())
         await self._r.sadd(TASK_INDEX_KEY, str(task.id))
 
-    async def get(self, task_id: str) -> Optional[Task]:
+    async def get(self, task_id: str) -> Task | None:
         """Retrieve a task by id, or None if not found."""
         key = f"{TASK_KEY_PREFIX}{task_id}"
         data = await self._r.get(key)
@@ -60,7 +57,7 @@ class TaskStore:
         """Push a task id onto the work queue."""
         await self._r.lpush(QUEUE_KEY, task_id)
 
-    async def dequeue(self) -> Optional[str]:
+    async def dequeue(self) -> str | None:
         """Pop the next task id from the work queue, or None if empty."""
         result = await self._r.rpop(QUEUE_KEY)
         return result

@@ -1,7 +1,7 @@
 """Typer CLI for the Minions orchestrator."""
 
-import typer
 import httpx
+import typer
 from rich.console import Console
 from rich.table import Table
 
@@ -16,8 +16,10 @@ def _base_url() -> str:
 
 
 @app.command()
-def run(description: str = typer.Argument(..., help="Task description"),
-        repo: str = typer.Argument(..., help="Repository (owner/name)")):
+def run(
+    description: str = typer.Argument(..., help="Task description"),
+    repo: str = typer.Argument(..., help="Repository (owner/name)"),
+):
     """Submit a new task."""
     resp = httpx.post(f"{_base_url()}/tasks", json={"description": description, "repo": repo})
     resp.raise_for_status()

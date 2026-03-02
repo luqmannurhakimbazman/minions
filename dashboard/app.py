@@ -61,9 +61,7 @@ else:
         col1, col2, col3 = st.columns([5, 2, 1])
 
         with col1:
-            st.markdown(
-                f"**{emoji} {task['status']}** — `{task['repo']}` — {task['description']}"
-            )
+            st.markdown(f"**{emoji} {task['status']}** — `{task['repo']}` — {task['description']}")
             if task.get("pr_url"):
                 st.markdown(f"[PR Link]({task['pr_url']})")
             st.caption(f"Retries: {task.get('retries', 0)}")
@@ -76,9 +74,7 @@ else:
                 cancel_key = f"cancel_{task['id']}"
                 if st.button("Cancel", key=cancel_key):
                     try:
-                        cancel_resp = httpx.post(
-                            f"{BASE_URL}/tasks/{task['id']}/cancel"
-                        )
+                        cancel_resp = httpx.post(f"{BASE_URL}/tasks/{task['id']}/cancel")
                         cancel_resp.raise_for_status()
                         st.rerun()
                     except httpx.HTTPError as exc:

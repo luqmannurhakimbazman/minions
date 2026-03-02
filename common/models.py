@@ -1,14 +1,14 @@
 """Shared domain models for the Minions orchestrator."""
 
-from datetime import datetime, timezone
-from enum import Enum
-from typing import Any, Optional
+from datetime import UTC, datetime
+from enum import StrEnum
+from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class TaskStatus(str, Enum):
+class TaskStatus(StrEnum):
     PENDING = "PENDING"
     PREFETCHING = "PREFETCHING"
     RUNNING = "RUNNING"
@@ -24,11 +24,11 @@ class Task(BaseModel):
     description: str
     repo: str
     status: TaskStatus = TaskStatus.PENDING
-    worktree_path: Optional[str] = None
-    branch_name: Optional[str] = None
-    pr_url: Optional[str] = None
+    worktree_path: str | None = None
+    branch_name: str | None = None
+    pr_url: str | None = None
     retries: int = 0
     context: dict[str, Any] = Field(default_factory=dict)
     logs: list[str] = Field(default_factory=list)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))

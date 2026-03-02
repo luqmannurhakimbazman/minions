@@ -2,21 +2,23 @@
 
 from pathlib import Path
 
-EXCLUDED_DIRS = frozenset({
-    ".git",
-    ".venv",
-    "venv",
-    "node_modules",
-    "__pycache__",
-    ".mypy_cache",
-    ".pytest_cache",
-    ".tox",
-    ".eggs",
-    "dist",
-    "build",
-    ".next",
-    ".nuxt",
-})
+EXCLUDED_DIRS = frozenset(
+    {
+        ".git",
+        ".venv",
+        "venv",
+        "node_modules",
+        "__pycache__",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".tox",
+        ".eggs",
+        "dist",
+        "build",
+        ".next",
+        ".nuxt",
+    }
+)
 
 
 def scan_repo_tree(

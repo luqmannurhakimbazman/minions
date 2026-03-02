@@ -6,37 +6,41 @@ import pathlib
 import yaml
 from prometheus_client import Counter, Histogram
 
-
 MONITORING_DIR = pathlib.Path(__file__).resolve().parent.parent / "monitoring"
 
 
 # ---- Task 7.1: Metric definitions ----
 
+
 class TestMetricDefinitions:
     def test_counters_exist(self):
         from monitoring.metrics import (
-            TASKS_SUBMITTED,
+            RETRIES_TOTAL,
             TASKS_COMPLETED,
             TASKS_FAILED,
-            RETRIES_TOTAL,
+            TASKS_SUBMITTED,
         )
+
         assert isinstance(TASKS_SUBMITTED, Counter)
         assert isinstance(TASKS_COMPLETED, Counter)
         assert isinstance(TASKS_FAILED, Counter)
         assert isinstance(RETRIES_TOTAL, Counter)
 
     def test_histograms_exist(self):
-        from monitoring.metrics import TASK_DURATION_SECONDS, CONTAINER_SPAWN_SECONDS
+        from monitoring.metrics import CONTAINER_SPAWN_SECONDS, TASK_DURATION_SECONDS
+
         assert isinstance(TASK_DURATION_SECONDS, Histogram)
         assert isinstance(CONTAINER_SPAWN_SECONDS, Histogram)
 
     def test_counter_can_increment(self):
         from monitoring.metrics import TASKS_SUBMITTED
+
         # Should not raise
         TASKS_SUBMITTED.inc()
 
 
 # ---- Task 7.2: Config files ----
+
 
 class TestPrometheusConfig:
     def test_prometheus_yml_exists(self):

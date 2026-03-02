@@ -3,8 +3,8 @@
 from fastapi import FastAPI
 from prometheus_client import make_asgi_app
 
-from api.routes import router
 import monitoring.metrics  # noqa: F401 — register Prometheus metrics
+from api.routes import router
 
 
 def create_app() -> FastAPI:

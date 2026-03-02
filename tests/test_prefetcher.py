@@ -2,11 +2,10 @@
 
 import subprocess
 
+from prefetcher.collect import prefetch
+from prefetcher.git_context import get_recent_commits
 from prefetcher.scanner import scan_repo_tree
 from prefetcher.search import search_keywords
-from prefetcher.git_context import get_recent_commits
-from prefetcher.collect import prefetch
-
 
 # ── Task 3.1: Repo tree scanner ──────────────────────────────────────
 
@@ -97,17 +96,20 @@ def test_get_recent_commits_returns_strings(tmp_path):
     subprocess.run(["git", "init"], cwd=tmp_path, capture_output=True)
     subprocess.run(
         ["git", "config", "user.email", "test@test.com"],
-        cwd=tmp_path, capture_output=True,
+        cwd=tmp_path,
+        capture_output=True,
     )
     subprocess.run(
         ["git", "config", "user.name", "Test"],
-        cwd=tmp_path, capture_output=True,
+        cwd=tmp_path,
+        capture_output=True,
     )
     (tmp_path / "f.txt").write_text("hi")
     subprocess.run(["git", "add", "."], cwd=tmp_path, capture_output=True)
     subprocess.run(
         ["git", "commit", "-m", "init"],
-        cwd=tmp_path, capture_output=True,
+        cwd=tmp_path,
+        capture_output=True,
     )
 
     commits = get_recent_commits(tmp_path, count=5)

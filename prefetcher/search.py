@@ -36,5 +36,5 @@ def search_keywords(
 
     lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
     # Normalise "./foo/bar.py" → "foo/bar.py"
-    cleaned = [l.removeprefix("./") for l in lines]
+    cleaned = [entry.removeprefix("./") for entry in lines]
     return cleaned[:max_results]

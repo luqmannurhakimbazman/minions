@@ -2,20 +2,83 @@
 
 from pathlib import Path
 
+from prefetcher.git_context import get_recent_commits
 from prefetcher.scanner import scan_repo_tree
 from prefetcher.search import search_keywords
-from prefetcher.git_context import get_recent_commits
 
 # Common English stop words to filter out of task descriptions.
-_STOP_WORDS = frozenset({
-    "a", "an", "the", "and", "or", "but", "in", "on", "at", "to", "for",
-    "of", "with", "by", "from", "is", "it", "as", "be", "was", "were",
-    "been", "are", "do", "does", "did", "will", "would", "could", "should",
-    "may", "might", "can", "have", "has", "had", "not", "no", "so", "if",
-    "then", "that", "this", "these", "those", "i", "me", "my", "we", "our",
-    "you", "your", "he", "she", "they", "them", "its", "all", "each",
-    "every", "any", "some", "such", "just", "about", "up", "out", "into",
-})
+_STOP_WORDS = frozenset(
+    {
+        "a",
+        "an",
+        "the",
+        "and",
+        "or",
+        "but",
+        "in",
+        "on",
+        "at",
+        "to",
+        "for",
+        "of",
+        "with",
+        "by",
+        "from",
+        "is",
+        "it",
+        "as",
+        "be",
+        "was",
+        "were",
+        "been",
+        "are",
+        "do",
+        "does",
+        "did",
+        "will",
+        "would",
+        "could",
+        "should",
+        "may",
+        "might",
+        "can",
+        "have",
+        "has",
+        "had",
+        "not",
+        "no",
+        "so",
+        "if",
+        "then",
+        "that",
+        "this",
+        "these",
+        "those",
+        "i",
+        "me",
+        "my",
+        "we",
+        "our",
+        "you",
+        "your",
+        "he",
+        "she",
+        "they",
+        "them",
+        "its",
+        "all",
+        "each",
+        "every",
+        "any",
+        "some",
+        "such",
+        "just",
+        "about",
+        "up",
+        "out",
+        "into",
+    }
+)
 
 
 def _extract_keywords(description: str) -> list[str]:

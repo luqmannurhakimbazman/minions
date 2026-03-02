@@ -1,7 +1,7 @@
 """Tests for common.redis_client — TaskStore with Redis CRUD and queue."""
 
-import pytest
 import fakeredis.aioredis
+import pytest
 
 from common.models import Task, TaskStatus
 from common.redis_client import TaskStore

@@ -1,6 +1,5 @@
 """Tests for common.models — TaskStatus enum and Task model."""
 
-import json
 from datetime import datetime
 from uuid import UUID
 

@@ -1,9 +1,7 @@
 """Tests for the Streamlit dashboard."""
 
 import ast
-import importlib
 import pathlib
-
 
 DASHBOARD_PATH = pathlib.Path(__file__).resolve().parent.parent / "dashboard" / "app.py"
 
