@@ -57,3 +57,20 @@ class TestEntrypoint:
     def test_entrypoint_references_branch_name(self):
         content = (CONTAINERS_DIR / "entrypoint.sh").read_text()
         assert "BRANCH_NAME" in content
+
+    def test_entrypoint_invokes_claude_cli(self):
+        content = (CONTAINERS_DIR / "entrypoint.sh").read_text()
+        assert "claude" in content
+        assert "--print" in content
+
+    def test_entrypoint_skips_permissions(self):
+        content = (CONTAINERS_DIR / "entrypoint.sh").read_text()
+        assert "--dangerously-skip-permissions" in content
+
+    def test_entrypoint_creates_pr(self):
+        content = (CONTAINERS_DIR / "entrypoint.sh").read_text()
+        assert "gh pr create" in content
+
+    def test_entrypoint_checks_for_commits_before_push(self):
+        content = (CONTAINERS_DIR / "entrypoint.sh").read_text()
+        assert "git diff" in content or "git rev-list" in content or "git status" in content
