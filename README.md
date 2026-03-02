@@ -18,14 +18,30 @@ Minions is composed of 6 services that work together:
 1. A task is submitted via the CLI or API (`POST /tasks`).
 2. The worker dequeues the task and transitions it through statuses: `PENDING` -> `PREFETCHING` -> `RUNNING` -> `COMPLETED` (or `RETRYING` -> `FAILED`).
 3. During prefetching, the repo tree is scanned and relevant files are collected based on keyword matching.
-4. An agent Docker container is spawned with the task context.
+4. An agent Docker container is spawned with the task context. Inside the container, Claude CLI runs in non-interactive mode (`--print`) to make code changes, then pushes the branch and creates a GitHub PR.
 5. On success the task is marked `COMPLETED`. On failure it is retried up to `max_retries` times before being marked `FAILED`.
+
+## Prerequisites
+
+The agent container uses [Claude CLI](https://docs.anthropic.com/en/docs/claude-code) and [GitHub CLI](https://cli.github.com/) via host-mounted credentials. Before starting:
+
+1. **Claude CLI** -- log in on your host machine (`claude auth`). The worker mounts `~/.claude` read-only into agent containers.
+2. **GitHub CLI** -- log in on your host machine (`gh auth login`). The worker mounts `~/.config/gh` and `~/.gitconfig` read-only into agent containers.
+3. **Docker** -- Docker Desktop or Docker Engine must be running.
+
+```bash
+# Build the agent image
+docker build -t minions-agent:latest -f containers/Dockerfile.agent containers/
+```
 
 ## Quick Start
 
 ```bash
 # Clone the repository
 git clone <repo-url> && cd minions
+
+# Build the agent image
+docker build -t minions-agent:latest -f containers/Dockerfile.agent containers/
 
 # Start all services with Docker Compose
 docker compose up --build -d
@@ -110,6 +126,9 @@ minions/
     metrics.py        # Prometheus metric definitions
     prometheus.yml    # Prometheus scrape config
     grafana/          # Grafana provisioning
+  containers/
+    Dockerfile.agent  # Agent container image (Claude CLI + gh)
+    entrypoint.sh     # Agent entrypoint: clone, run Claude CLI, push, PR
   tests/              # Pytest test suite
   Dockerfile          # Container image for API/worker/dashboard
   docker-compose.yml  # Full stack orchestration
