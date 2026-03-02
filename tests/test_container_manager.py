@@ -101,7 +101,7 @@ class TestRun:
 class TestRunMountsAuthVolumes:
     @patch("worker.container_manager.docker")
     @patch("worker.container_manager.Path.home")
-    def test_mounts_claude_dir_when_exists(self, mock_home, mock_docker, manager, task):
+    def test_mounts_all_auth_dirs_when_exist(self, mock_home, mock_docker, manager, task):
         import tempfile
 
         with tempfile.TemporaryDirectory() as tmp:
@@ -124,6 +124,17 @@ class TestRunMountsAuthVolumes:
             call_kwargs = mock_client.containers.run.call_args
             volumes = call_kwargs.kwargs.get("volumes") or call_kwargs[1].get("volumes", {})
             assert str(tmp_path / ".claude") in volumes
+            assert str(tmp_path / ".config" / "gh") in volumes
+            assert str(tmp_path / ".gitconfig") in volumes
+            assert volumes[str(tmp_path / ".claude")] == {"bind": "/root/.claude", "mode": "ro"}
+            assert volumes[str(tmp_path / ".config" / "gh")] == {
+                "bind": "/root/.config/gh",
+                "mode": "ro",
+            }
+            assert volumes[str(tmp_path / ".gitconfig")] == {
+                "bind": "/root/.gitconfig",
+                "mode": "ro",
+            }
 
     @patch("worker.container_manager.docker")
     @patch("worker.container_manager.Path.home")
