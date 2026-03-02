@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from typing import Any
 
 import docker
@@ -31,6 +32,20 @@ class ContainerManager:
             "PROMPT": task.description,
         }
 
+    def _build_volumes(self) -> dict[str, dict[str, str]]:
+        """Build volume mounts for host auth directories."""
+        home = Path.home()
+        mounts: list[tuple[Path, str]] = [
+            (home / ".claude", "/root/.claude"),
+            (home / ".config" / "gh", "/root/.config/gh"),
+            (home / ".gitconfig", "/root/.gitconfig"),
+        ]
+        volumes: dict[str, dict[str, str]] = {}
+        for host_path, container_path in mounts:
+            if host_path.exists():
+                volumes[str(host_path)] = {"bind": container_path, "mode": "ro"}
+        return volumes
+
     def run(self, task: Task, context: dict[str, Any]) -> dict[str, Any]:
         """Spawn a container, wait for it to finish, and return results.
 
@@ -38,11 +53,13 @@ class ContainerManager:
         """
         client = docker.from_env()
         env = self._build_env(task, context)
+        volumes = self._build_volumes()
 
         container = client.containers.run(
             self._settings.container_image,
             environment=env,
             network_mode=self._settings.container_network_mode,
+            volumes=volumes,
             detach=True,
         )
 

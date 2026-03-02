@@ -1,6 +1,7 @@
 """Tests for worker.container_manager — Docker SDK wrapper."""
 
 import json
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
@@ -95,3 +96,55 @@ class TestRun:
 
         assert result["exit_code"] == 1
         assert result["logs"] == "Error occurred\n"
+
+
+class TestRunMountsAuthVolumes:
+    @patch("worker.container_manager.docker")
+    @patch("worker.container_manager.Path.home")
+    def test_mounts_claude_dir_when_exists(self, mock_home, mock_docker, manager, task):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            (tmp_path / ".claude").mkdir()
+            (tmp_path / ".config" / "gh").mkdir(parents=True)
+            (tmp_path / ".gitconfig").touch()
+            mock_home.return_value = tmp_path
+
+            mock_container = MagicMock()
+            mock_container.wait.return_value = {"StatusCode": 0}
+            mock_container.logs.return_value = b"ok"
+            mock_client = MagicMock()
+            mock_client.containers.run.return_value = mock_container
+            mock_docker.from_env.return_value = mock_client
+
+            context = {"tree": [], "relevant_files": [], "git_log": []}
+            manager.run(task, context)
+
+            call_kwargs = mock_client.containers.run.call_args
+            volumes = call_kwargs.kwargs.get("volumes") or call_kwargs[1].get("volumes", {})
+            assert str(tmp_path / ".claude") in volumes
+
+    @patch("worker.container_manager.docker")
+    @patch("worker.container_manager.Path.home")
+    def test_skips_missing_auth_dirs(self, mock_home, mock_docker, manager, task):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            # No .claude, .config/gh, or .gitconfig created
+            mock_home.return_value = tmp_path
+
+            mock_container = MagicMock()
+            mock_container.wait.return_value = {"StatusCode": 0}
+            mock_container.logs.return_value = b"ok"
+            mock_client = MagicMock()
+            mock_client.containers.run.return_value = mock_container
+            mock_docker.from_env.return_value = mock_client
+
+            context = {"tree": [], "relevant_files": [], "git_log": []}
+            manager.run(task, context)
+
+            call_kwargs = mock_client.containers.run.call_args
+            volumes = call_kwargs.kwargs.get("volumes") or call_kwargs[1].get("volumes", {})
+            assert volumes == {}
