@@ -49,16 +49,13 @@ Grafana default credentials: `admin` / `admin`.
 
 ```bash
 # Install the project (includes the CLI)
-pip install -e ".[dev]"
+uv pip install -e ".[dev]"
 
 # Submit a task
-minion submit --repo https://github.com/org/repo "Fix the login bug"
+minion run "Fix the login bug" https://github.com/org/repo
 
 # List all tasks
-minion list
-
-# Check task status
-minion status <task-id>
+minion status
 
 # View task logs
 minion logs <task-id>
@@ -71,9 +68,9 @@ minion cancel <task-id>
 
 ```bash
 # Create a virtual environment and install dev dependencies
-python -m venv .venv
+uv venv
 source .venv/bin/activate
-pip install -e ".[dev]"
+uv pip install -e ".[dev]"
 
 # Run tests
 pytest -v
