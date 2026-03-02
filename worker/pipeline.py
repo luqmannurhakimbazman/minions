@@ -2,9 +2,17 @@
 
 from __future__ import annotations
 
+import time
+
 from common.config import Settings
 from common.models import Task, TaskStatus
 from common.redis_client import TaskStore
+from monitoring.metrics import (
+    RETRIES_TOTAL,
+    TASK_DURATION_SECONDS,
+    TASKS_COMPLETED,
+    TASKS_FAILED,
+)
 from prefetcher.collect import prefetch
 from worker.container_manager import ContainerManager
 
@@ -24,6 +32,8 @@ class BlueprintPipeline:
 
     async def process_task(self, task: Task) -> None:
         """Execute the full pipeline for a single task."""
+        start = time.monotonic()
+
         # 1. Prefetch context
         task.status = TaskStatus.PREFETCHING
         await self._store.save(task)
@@ -40,14 +50,20 @@ class BlueprintPipeline:
         if result["exit_code"] == 0:
             task.status = TaskStatus.COMPLETED
             await self._store.save(task)
+            TASKS_COMPLETED.inc()
         else:
             await self._handle_failure(task)
+
+        elapsed = time.monotonic() - start
+        TASK_DURATION_SECONDS.observe(elapsed)
 
     async def _handle_failure(self, task: Task) -> None:
         """Retry the task or mark it as failed."""
         if task.retries >= self._settings.max_retries:
             task.status = TaskStatus.FAILED
+            TASKS_FAILED.inc()
         else:
             task.retries += 1
             task.status = TaskStatus.RETRYING
+            RETRIES_TOTAL.inc()
         await self._store.save(task)
