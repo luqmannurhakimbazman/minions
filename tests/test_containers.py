@@ -23,6 +23,18 @@ class TestDockerfileAgent:
         content = (CONTAINERS_DIR / "Dockerfile.agent").read_text()
         assert "python:" in content.lower() or "FROM python" in content
 
+    def test_dockerfile_installs_nodejs(self):
+        content = (CONTAINERS_DIR / "Dockerfile.agent").read_text()
+        assert "nodejs" in content or "node" in content
+
+    def test_dockerfile_installs_claude_cli(self):
+        content = (CONTAINERS_DIR / "Dockerfile.agent").read_text()
+        assert "@anthropic-ai/claude-code" in content
+
+    def test_dockerfile_installs_github_cli(self):
+        content = (CONTAINERS_DIR / "Dockerfile.agent").read_text()
+        assert "gh" in content
+
 
 class TestEntrypoint:
     """Verify containers/entrypoint.sh exists and has required content."""
