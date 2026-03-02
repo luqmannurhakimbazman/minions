@@ -25,12 +25,15 @@ Commit your changes when done.
 EOF
 )"
 
+CLONE_HEAD=$(git rev-parse HEAD)
+
 echo "$FULL_PROMPT" | claude --print \
     --dangerously-skip-permissions \
-    --no-session-persistence
+    --no-session-persistence \
+    || { echo "==> Claude CLI failed with exit code $?"; exit 1; }
 
 echo "==> Checking for changes"
-if ! git diff --quiet HEAD origin/HEAD 2>/dev/null; then
+if [ "$(git rev-list --count "$CLONE_HEAD"..HEAD 2>/dev/null)" -gt 0 ]; then
     echo "==> Pushing branch: $BRANCH_NAME"
     git push -u origin "$BRANCH_NAME"
 

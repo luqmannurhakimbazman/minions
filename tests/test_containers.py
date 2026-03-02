@@ -67,6 +67,10 @@ class TestEntrypoint:
         content = (CONTAINERS_DIR / "entrypoint.sh").read_text()
         assert "--dangerously-skip-permissions" in content
 
+    def test_entrypoint_no_session_persistence(self):
+        content = (CONTAINERS_DIR / "entrypoint.sh").read_text()
+        assert "--no-session-persistence" in content
+
     def test_entrypoint_creates_pr(self):
         content = (CONTAINERS_DIR / "entrypoint.sh").read_text()
         assert "gh pr create" in content
