@@ -84,3 +84,18 @@ class TestGetTask:
     async def test_get_task_not_found(self, client):
         resp = await client.get("/tasks/00000000-0000-0000-0000-000000000000")
         assert resp.status_code == 404
+
+
+class TestCancelTask:
+    async def test_cancel_task_returns_200(self, client):
+        create_resp = await client.post(
+            "/tasks", json={"description": "Fix bug", "repo": "org/repo"}
+        )
+        task_id = create_resp.json()["id"]
+        resp = await client.post(f"/tasks/{task_id}/cancel")
+        assert resp.status_code == 200
+        assert resp.json()["status"] == "CANCELLED"
+
+    async def test_cancel_task_not_found(self, client):
+        resp = await client.post("/tasks/00000000-0000-0000-0000-000000000000/cancel")
+        assert resp.status_code == 404

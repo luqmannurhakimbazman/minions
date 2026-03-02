@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from api.deps import get_task_store
-from common.models import Task
+from common.models import Task, TaskStatus
 from common.redis_client import TaskStore
 
 router = APIRouter()
@@ -36,4 +36,14 @@ async def get_task(task_id: str, store: TaskStore = Depends(get_task_store)) -> 
     task = await store.get(task_id)
     if task is None:
         raise HTTPException(status_code=404, detail="Task not found")
+    return task
+
+
+@router.post("/tasks/{task_id}/cancel")
+async def cancel_task(task_id: str, store: TaskStore = Depends(get_task_store)) -> Task:
+    task = await store.get(task_id)
+    if task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+    await store.update_status(task_id, TaskStatus.CANCELLED)
+    task.status = TaskStatus.CANCELLED
     return task
