@@ -1,0 +1,45 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 3
+
+  api:
+    build: .
+    ports: ["8000:8000"]
+    depends_on:
+      redis: { condition: service_healthy }
+    environment:
+      MINIONS_REDIS_URL: redis://redis:6379
+
+  worker:
+    build: .
+    command: python -m worker.run
+    depends_on:
+      redis: { condition: service_healthy }
+    environment:
+      MINIONS_REDIS_URL: redis://redis:6379
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  dashboard:
+    build: .
+    command: streamlit run dashboard/app.py --server.port 8501 --server.address 0.0.0.0
+    ports: ["8501:8501"]
+    environment:
+      MINIONS_API_BASE_URL: http://api:8000
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports: ["9090:9090"]
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana:latest
+    ports: ["3000:3000"]
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
