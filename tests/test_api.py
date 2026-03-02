@@ -99,3 +99,13 @@ class TestCancelTask:
     async def test_cancel_task_not_found(self, client):
         resp = await client.post("/tasks/00000000-0000-0000-0000-000000000000/cancel")
         assert resp.status_code == 404
+
+
+class TestMetricsEndpoint:
+    async def test_metrics_returns_200(self, client):
+        resp = await client.get("/metrics", follow_redirects=True)
+        assert resp.status_code == 200
+
+    async def test_metrics_contains_prometheus_format(self, client):
+        resp = await client.get("/metrics", follow_redirects=True)
+        assert "minions_" in resp.text
